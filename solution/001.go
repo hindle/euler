@@ -1,4 +1,4 @@
-package euler
+package solution
 
 import "strconv"
 
