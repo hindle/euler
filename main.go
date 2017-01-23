@@ -2,19 +2,21 @@ package main
 
 import (
 	"fmt"
+	"github.com/hindle/euler/solution"
 	"github.com/urfave/cli"
 	"os"
-	"github.com/hindle/euler/solution"
 	"time"
 )
+
+var m map[int]solution.Solution
 
 func main() {
 	var problem int
 
 	app := cli.NewApp()
 
-	app.Flags =[]cli.Flag {
-		cli.IntFlag {
+	app.Flags = []cli.Flag{
+		cli.IntFlag{
 			Name:        "problem, p",
 			Value:       1,
 			Usage:       "problem solution to be run",
@@ -25,40 +27,60 @@ func main() {
 	app.Action = func(c *cli.Context) error {
 
 		fmt.Printf("Running solution for problem %v:\n", problem)
-		fmt.Printf("%v\n\n", getProblem(problem))
+
+		prob, ok := getProblem(problem)
+
+		fmt.Printf("%v\n\n", prob)
+
+		if !ok {
+			return nil
+		}
 
 		start := time.Now()
-		solution := getSolution(problem)
+		ans, ok := getAnswer(problem)
 		execTime := time.Since(start)
 
-		fmt.Printf("Solution: %v\n", solution)
-		fmt.Printf("Execution time: %v\n", execTime)
+		if ok {
+			fmt.Printf("Answer: %v\n", ans)
+			fmt.Printf("Execution time: %v\n", execTime)
+		} else {
+			fmt.Printf("%v\n", ans)
+		}
+
 		return nil
 	}
 
 	app.Run(os.Args)
 }
 
-func getProblem(problemNo int) string {
+func getProblem(probNo int) (string, bool) {
+	prob := "Problem not found!"
 
-	switch problemNo {
-	case 1:
-		return solution.GetProblem001()
-	case 2:
-		return solution.GetProblem002()
-	default:
-		return "Problem not found"
+	sol, ok := m[probNo]
+
+	if ok {
+		prob = sol.Problem
 	}
+
+	return prob, ok
 }
 
-func getSolution(problemNo int) string {
+func getAnswer(probNo int) (string, bool) {
+	ans := "Answer not defined!"
 
-	switch problemNo {
-	case 1:
-		return solution.GetSolution001()
-	case 2:
-		return solution.GetSolution002()
-	default:
-		return "Solution not found"
+	sol, ok := m[probNo]
+
+	if ok {
+		ans = sol.Answer()
 	}
+
+	return ans, ok
+}
+
+func init() {
+	m = make(map[int]solution.Solution)
+
+	m[1] = solution.Sol001()
+	m[2] = solution.Sol002()
+	m[3] = solution.Sol003()
 }
